@@ -24,7 +24,6 @@
       flex-direction: column;
       gap: 1.25rem;
     }
-    /* header */
     .header {
       display: flex;
       align-items: flex-end;
@@ -60,7 +59,6 @@
       letter-spacing: 0.04em;
       white-space: nowrap;
     }
-    /* cards */
     .card {
       background: #101018;
       border: 1px solid #222236;
@@ -238,7 +236,6 @@
       border-radius: 8px;
       font-size: 0.8rem;
     }
-    /* asset rows */
     .asset-list { display: flex; flex-direction: column; gap: 0.5rem; }
     .asset-row {
       background: #181826;
@@ -389,9 +386,6 @@
     }
     .key-btn:hover { background: rgba(124, 109, 250, 0.15); border-color: #7c6dfa; color: #a78bfa; }
     .key-btn.picked { background: rgba(124, 109, 250, 0.2); border-color: #7c6dfa; color: #a78bfa; }
-    .flex-grow { flex: 1; }
-    .gap-1 { gap: 0.5rem; }
-    .mt-1 { margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -607,7 +601,7 @@
     const cur = _pickerTarget ? val(_pickerTarget) : '';
     const list = q ? ALL_KEYS.filter(k => k.toLowerCase().includes(q.toLowerCase())) : ALL_KEYS;
     $('keyGrid').innerHTML = list.map(k =>
-      `<div class="key-btn ${k===cur?'picked':''}" onclick="pickKey('${k}')">${k}</div>`
+      '<div class="key-btn ' + (k===cur?'picked':'') + '" onclick="pickKey(\''+k+'\')">'+k+'</div>'
     ).join('');
   }
   function pickKey(k) { if (_pickerTarget) $(_pickerTarget).value = k; closePicker(); }
@@ -627,9 +621,9 @@
     chev.classList.toggle('open');
   }
   const toggleHtml = (chk, onchange) =>
-    `<label class="toggle"><input type="checkbox" ${chk?'checked ':''} onchange="${onchange}"><span class="toggle-slider"></span></label>`;
+    '<label class="toggle"><input type="checkbox" ' + (chk?'checked ':'') + ' onchange="' + onchange + '"><span class="toggle-slider"></span></label>';
   const keyPickerHtml = (fid, val) =>
-    `<div class="key-picker"><input type="text" id="${fid}" value="${esc(val)}" readonly onclick="openPicker('${fid}')"><button class="btn btn-purple" onclick="openPicker('${fid}')">key</button></div>`;
+    '<div class="key-picker"><input type="text" id="'+fid+'" value="'+esc(val)+'" readonly onclick="openPicker(\''+fid+'\')"><button class="btn btn-purple" onclick="openPicker(\''+fid+'\')">key</button></div>';
 
   // -------- MODES --------
   function addMode() {
@@ -676,54 +670,57 @@
     modes.forEach((mo, idx) => {
       const d = document.createElement('div');
       d.className = 'mode-card';
-      const atkHTML = mo.attacks.map(a => `
-        <div class="asset-row" style="margin:0">
-          <div class="asset-row-top">
-            <input type="text" placeholder="attack name" value="${esc(a.name)}" oninput="setModeAttack(${mo.id},${a.id},'name',this.value)" style="flex:1;min-width:70px">
-            <input type="text" placeholder="filename.anim" value="${esc(a.animFile)}" oninput="setModeAttack(${mo.id},${a.id},'animFile',this.value)" style="flex:2;min-width:90px">
-            <span class="badge badge-mode-atk">mode atk</span>
-            <button class="exp-btn" onclick="toggleExpand('ma${a.id}')">cfg <span class="chev" id="ac-ma${a.id}">▾</span></button>
-            <button class="btn btn-red" onclick="removeModeAttack(${mo.id},${a.id})" style="padding:0.2rem 0.6rem;font-size:0.65rem">×</button>
-          </div>
-          <div class="asset-body" id="ab-ma${a.id}">
-            <div>
-              <div class="sub">fling & hitbox</div>
-              <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.fling, `setModeAttack(${mo.id},${a.id},'fling',this.checked)`)}<span class="notice">Fling on hit</span></div>
-              <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.hbOn, `setModeAttack(${mo.id},${a.id},'hbOn',this.checked);document.getElementById('mhb${a.id}').style.display=this.checked?'flex':'none'`)}<span class="notice">Custom hitbox (requires Fling)</span></div>
-              <div id="mhb${a.id}" style="display:${a.hbOn?'flex':'none'};flex-direction:column;gap:0.6rem">
-                <div class="grid-3">
-                  <div class="field"><label>Shape</label><select onchange="setModeAttack(${mo.id},${a.id},'hbShape',this.value)"><option${a.hbShape==='Sphere'?' selected':''}>Sphere</option><option${a.hbShape==='Box'?' selected':''}>Box</option></select></div>
-                  <div class="field"><label>Radius / size</label><input type="number" step="0.5" min="0.1" value="${a.hbRadius}" oninput="setModeAttack(${mo.id},${a.id},'hbRadius',this.value)"></div>
-                  <div class="field"><label>Duration (s, 0=full)</label><input type="number" step="0.1" min="0" value="${a.hbDur}" oninput="setModeAttack(${mo.id},${a.id},'hbDur',this.value)"></div>
+      let atkHTML = '';
+      mo.attacks.forEach(a => {
+        atkHTML += `
+          <div class="asset-row" style="margin:0">
+            <div class="asset-row-top">
+              <input type="text" placeholder="attack name" value="${esc(a.name)}" oninput="setModeAttack(${mo.id},${a.id},'name',this.value)" style="flex:1;min-width:70px">
+              <input type="text" placeholder="filename.anim" value="${esc(a.animFile)}" oninput="setModeAttack(${mo.id},${a.id},'animFile',this.value)" style="flex:2;min-width:90px">
+              <span class="badge badge-mode-atk">mode atk</span>
+              <button class="exp-btn" onclick="toggleExpand('ma${a.id}')">cfg <span class="chev" id="ac-ma${a.id}">▾</span></button>
+              <button class="btn btn-red" onclick="removeModeAttack(${mo.id},${a.id})" style="padding:0.2rem 0.6rem;font-size:0.65rem">×</button>
+            </div>
+            <div class="asset-body" id="ab-ma${a.id}">
+              <div>
+                <div class="sub">fling & hitbox</div>
+                <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.fling, 'setModeAttack('+mo.id+','+a.id+',\'fling\',this.checked)')}<span class="notice">Fling on hit</span></div>
+                <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.hbOn, 'setModeAttack('+mo.id+','+a.id+',\'hbOn\',this.checked);document.getElementById(\'mhb'+a.id+'\').style.display=this.checked?\'flex\':\'none\'')}<span class="notice">Custom hitbox (requires Fling)</span></div>
+                <div id="mhb${a.id}" style="display:${a.hbOn?'flex':'none'};flex-direction:column;gap:0.6rem">
+                  <div class="grid-3">
+                    <div class="field"><label>Shape</label><select onchange="setModeAttack(${mo.id},${a.id},'hbShape',this.value)"><option${a.hbShape==='Sphere'?' selected':''}>Sphere</option><option${a.hbShape==='Box'?' selected':''}>Box</option></select></div>
+                    <div class="field"><label>Radius / size</label><input type="number" step="0.5" min="0.1" value="${a.hbRadius}" oninput="setModeAttack(${mo.id},${a.id},'hbRadius',this.value)"></div>
+                    <div class="field"><label>Duration (s, 0=full)</label><input type="number" step="0.1" min="0" value="${a.hbDur}" oninput="setModeAttack(${mo.id},${a.id},'hbDur',this.value)"></div>
+                  </div>
+                  <div class="grid-3">
+                    <div class="field"><label>Anchor part</label><select onchange="setModeAttack(${mo.id},${a.id},'hbAnchor',this.value)">${['HumanoidRootPart','Right Arm','Left Arm','Right Leg','Left Leg','Head','Torso'].map(p=>'<option'+(a.hbAnchor===p?' selected':'')+'>'+p+'</option>').join('')}</select></div>
+                    <div class="field"><label>Forward offset</label><input type="number" step="0.5" value="${a.hbFwd}" oninput="setModeAttack(${mo.id},${a.id},'hbFwd',this.value)"></div>
+                    <div class="field"><label>Up offset</label><input type="number" step="0.5" value="${a.hbUp}" oninput="setModeAttack(${mo.id},${a.id},'hbUp',this.value)"></div>
+                  </div>
                 </div>
-                <div class="grid-3">
-                  <div class="field"><label>Anchor part</label><select onchange="setModeAttack(${mo.id},${a.id},'hbAnchor',this.value)">${['HumanoidRootPart','Right Arm','Left Arm','Right Leg','Left Leg','Head','Torso'].map(p=>`<option${a.hbAnchor===p?' selected':''}>${p}</option>`).join('')}</select></div>
-                  <div class="field"><label>Forward offset</label><input type="number" step="0.5" value="${a.hbFwd}" oninput="setModeAttack(${mo.id},${a.id},'hbFwd',this.value)"></div>
-                  <div class="field"><label>Up offset</label><input type="number" step="0.5" value="${a.hbUp}" oninput="setModeAttack(${mo.id},${a.id},'hbUp',this.value)"></div>
+              </div>
+              <div>
+                <div class="sub">audio & button</div>
+                <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.loopAudio, 'setModeAttack('+mo.id+','+a.id+',\'loopAudio\',this.checked);document.getElementById(\'mlaf'+a.id+'\').style.display=this.checked?\'grid\':\'none\'')}<span class="notice">Loop audio during attack</span></div>
+                <div id="mlaf${a.id}" class="grid-2" style="display:${a.loopAudio?'grid':'none'};margin-bottom:0.4rem">
+                  <div class="field"><label>Audio file</label><input type="text" placeholder="sound.mp3" value="${esc(a.loopFile)}" oninput="setModeAttack(${mo.id},${a.id},'loopFile',this.value)"></div>
+                  <div class="field"><label>Volume</label><input type="number" min="0" max="1" step="0.05" value="${a.loopVol}" oninput="setModeAttack(${mo.id},${a.id},'loopVol',this.value)"></div>
+                </div>
+                <div class="grid-4">
+                  <div class="field"><label>Keybind</label>${keyPickerHtml('mak_'+a.id, a.key)}</div>
+                  <div class="field"><label>Btn label</label><input type="text" value="${esc(a.btnLabel)}" oninput="setModeAttack(${mo.id},${a.id},'btnLabel',this.value)"></div>
+                  <div class="field"><label>Pos X scale</label><input type="number" step="0.01" value="${a.btnPX}" oninput="setModeAttack(${mo.id},${a.id},'btnPX',this.value)"></div>
+                  <div class="field"><label>Pos X offset</label><input type="number" step="5" value="${a.btnOX}" oninput="setModeAttack(${mo.id},${a.id},'btnOX',this.value)"></div>
+                </div>
+                <div class="grid-2">
+                  <div class="field"><label>Pos Y scale</label><input type="number" step="0.01" value="${a.btnPY}" oninput="setModeAttack(${mo.id},${a.id},'btnPY',this.value)"></div>
+                  <div class="field"><label>Pos Y offset</label><input type="number" step="5" value="${a.btnOY}" oninput="setModeAttack(${mo.id},${a.id},'btnOY',this.value)"></div>
                 </div>
               </div>
             </div>
-            <div>
-              <div class="sub">audio & button</div>
-              <div class="toggle-wrap" style="margin-bottom:0.4rem">${toggleHtml(a.loopAudio, `setModeAttack(${mo.id},${a.id},'loopAudio',this.checked);document.getElementById('mlaf${a.id}').style.display=this.checked?'grid':'none'`)}<span class="notice">Loop audio during attack</span></div>
-              <div id="mlaf${a.id}" class="grid-2" style="display:${a.loopAudio?'grid':'none'};margin-bottom:0.4rem">
-                <div class="field"><label>Audio file</label><input type="text" placeholder="sound.mp3" value="${esc(a.loopFile)}" oninput="setModeAttack(${mo.id},${a.id},'loopFile',this.value)"></div>
-                <div class="field"><label>Volume</label><input type="number" min="0" max="1" step="0.05" value="${a.loopVol}" oninput="setModeAttack(${mo.id},${a.id},'loopVol',this.value)"></div>
-              </div>
-              <div class="grid-4">
-                <div class="field"><label>Keybind</label>${keyPickerHtml('mak_'+a.id, a.key)}</div>
-                <div class="field"><label>Btn label</label><input type="text" value="${esc(a.btnLabel)}" oninput="setModeAttack(${mo.id},${a.id},'btnLabel',this.value)"></div>
-                <div class="field"><label>Pos X scale</label><input type="number" step="0.01" value="${a.btnPX}" oninput="setModeAttack(${mo.id},${a.id},'btnPX',this.value)"></div>
-                <div class="field"><label>Pos X offset</label><input type="number" step="5" value="${a.btnOX}" oninput="setModeAttack(${mo.id},${a.id},'btnOX',this.value)"></div>
-              </div>
-              <div class="grid-2">
-                <div class="field"><label>Pos Y scale</label><input type="number" step="0.01" value="${a.btnPY}" oninput="setModeAttack(${mo.id},${a.id},'btnPY',this.value)"></div>
-                <div class="field"><label>Pos Y offset</label><input type="number" step="5" value="${a.btnOY}" oninput="setModeAttack(${mo.id},${a.id},'btnOY',this.value)"></div>
-              </div>
-            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      });
 
       d.innerHTML = `
         <div class="mode-head">
@@ -770,7 +767,7 @@
   // -------- ASSETS --------
   function addAsset(type) {
     assets.push({
-      id: uid(), type,
+      id: uid(), type: type,
       name: '', baseRole: 'idle', animFile: '',
       key: 'Z', fling: false, btnLabel: '',
       btnPX: '1', btnOX: '-230', btnPY: '1', btnOY: '-130',
@@ -797,12 +794,12 @@
         top = `
           <input type="text" placeholder="filename.anim" value="${esc(a.name)}" oninput="setAsset(${a.id},'name',this.value)" style="flex:2;min-width:110px">
           <select style="min-width:70px;flex:0" onchange="setAsset(${a.id},'baseRole',this.value)">
-            ${['idle','walk','sprint','jump'].map(r=>`<option${a.baseRole===r?' selected':''}>${r}</option>`).join('')}
+            ${['idle','walk','sprint','jump'].map(r=>'<option'+(a.baseRole===r?' selected':'')+'>'+r+'</option>').join('')}
           </select>
           <span class="badge badge-base">base</span>`;
         body = `
           <div class="sub">loop audio while active</div>
-          <div class="toggle-wrap">${toggleHtml(a.loopAudio, `setAsset(${a.id},'loopAudio',this.checked);document.getElementById('laf${a.id}').style.display=this.checked?'grid':'none'`)}<span class="notice">Play looped sound</span></div>
+          <div class="toggle-wrap">${toggleHtml(a.loopAudio, 'setAsset('+a.id+',\'loopAudio\',this.checked);document.getElementById(\'laf'+a.id+'\').style.display=this.checked?\'grid\':\'none\'')}<span class="notice">Play looped sound</span></div>
           <div id="laf${a.id}" class="grid-2" style="display:${a.loopAudio?'grid':'none'}">
             <div class="field"><label>Audio file</label><input type="text" placeholder="walk.mp3" value="${esc(a.loopFile)}" oninput="setAsset(${a.id},'loopFile',this.value)"></div>
             <div class="field"><label>Volume</label><input type="number" min="0" max="1" step="0.05" value="${a.loopVol}" oninput="setAsset(${a.id},'loopVol',this.value)"></div>
@@ -813,9 +810,9 @@
           <input type="text" placeholder="filename.anim" value="${esc(a.animFile)}" oninput="setAsset(${a.id},'animFile',this.value)" style="flex:2;min-width:100px">
           <span class="badge badge-action">attack</span>`;
         body = `
-          <div><div class="sub">fling on hit</div><div class="toggle-wrap">${toggleHtml(a.fling, `setAsset(${a.id},'fling',this.checked)`)}<span class="notice">Call ReanimateFling(target) on touched chars</span></div></div>
+          <div><div class="sub">fling on hit</div><div class="toggle-wrap">${toggleHtml(a.fling, 'setAsset('+a.id+',\'fling\',this.checked)')}<span class="notice">Call ReanimateFling(target) on touched chars</span></div></div>
           <div><div class="sub">custom hitbox</div>
-          <div class="toggle-wrap">${toggleHtml(a.hbOn, `setAsset(${a.id},'hbOn',this.checked);document.getElementById('hb${a.id}').style.display=this.checked?'flex':'none'`)}<span class="notice">Spawn hitbox at start</span></div>
+          <div class="toggle-wrap">${toggleHtml(a.hbOn, 'setAsset('+a.id+',\'hbOn\',this.checked);document.getElementById(\'hb'+a.id+'\').style.display=this.checked?\'flex\':\'none\'')}<span class="notice">Spawn hitbox at start</span></div>
           <div id="hb${a.id}" style="display:${a.hbOn?'flex':'none'};flex-direction:column;gap:0.6rem">
             <div class="grid-3">
               <div class="field"><label>Shape</label><select onchange="setAsset(${a.id},'hbShape',this.value)"><option${a.hbShape==='Sphere'?' selected':''}>Sphere</option><option${a.hbShape==='Box'?' selected':''}>Box</option></select></div>
@@ -823,13 +820,13 @@
               <div class="field"><label>Fire after (s, 0=start)</label><input type="number" step="0.05" min="0" value="${a.hbDur}" oninput="setAsset(${a.id},'hbDur',this.value)"></div>
             </div>
             <div class="grid-3">
-              <div class="field"><label>Anchor part</label><select onchange="setAsset(${a.id},'hbAnchor',this.value)">${['HumanoidRootPart','Right Arm','Left Arm','Right Leg','Left Leg','Head','Torso'].map(p=>`<option${a.hbAnchor===p?' selected':''}>${p}</option>`).join('')}</select></div>
+              <div class="field"><label>Anchor part</label><select onchange="setAsset(${a.id},'hbAnchor',this.value)">${['HumanoidRootPart','Right Arm','Left Arm','Right Leg','Left Leg','Head','Torso'].map(p=>'<option'+(a.hbAnchor===p?' selected':'')+'>'+p+'</option>').join('')}</select></div>
               <div class="field"><label>Forward offset</label><input type="number" step="0.5" value="${a.hbFwd}" oninput="setAsset(${a.id},'hbFwd',this.value)"></div>
               <div class="field"><label>Up offset</label><input type="number" step="0.5" value="${a.hbUp}" oninput="setAsset(${a.id},'hbUp',this.value)"></div>
             </div>
           </div></div>
           <div><div class="sub">audio during attack</div>
-          <div class="toggle-wrap">${toggleHtml(a.loopAudio, `setAsset(${a.id},'loopAudio',this.checked);document.getElementById('laf${a.id}').style.display=this.checked?'grid':'none'`)}<span class="notice">Play sound while active</span></div>
+          <div class="toggle-wrap">${toggleHtml(a.loopAudio, 'setAsset('+a.id+',\'loopAudio\',this.checked);document.getElementById(\'laf'+a.id+'\').style.display=this.checked?\'grid\':\'none\'')}<span class="notice">Play sound while active</span></div>
           <div id="laf${a.id}" class="grid-2" style="display:${a.loopAudio?'grid':'none'}">
             <div class="field"><label>Audio file</label><input type="text" placeholder="swing.mp3" value="${esc(a.loopFile)}" oninput="setAsset(${a.id},'loopFile',this.value)"></div>
             <div class="field"><label>Volume</label><input type="number" min="0" max="1" step="0.05" value="${a.loopVol}" oninput="setAsset(${a.id},'loopVol',this.value)"></div>
@@ -850,7 +847,7 @@
         top = `
           <input type="text" placeholder="background.mp3" value="${esc(a.soundName)}" oninput="setAsset(${a.id},'soundName',this.value)" style="flex:1;min-width:140px">
           <span class="badge badge-sound">bg sound</span>`;
-        body = `<div class="notice">Plays on Init, destroyed on Destroy.</div>`;
+        body = '<div class="notice">Plays on Init, destroyed on Destroy.</div>';
       }
       div.innerHTML = `
         <div class="asset-row-top">${top}
@@ -918,577 +915,568 @@
     const uniqueFiles = [...new Set(allFiles)];
 
     const baseAnimsLua = baseA.length
-      ? baseA.map(a => `        ${a.baseRole} = loadAnim(figure, "${a.name||a.baseRole+' '+internal+'.anim'}", true),`).join('\n')
+      ? baseA.map(a => '        ' + a.baseRole + ' = loadAnim(figure, "' + (a.name||a.baseRole+' '+internal+'.anim') + '", true),').join('\n')
       : ['        idle   = loadAnim(figure, "idle '+internal+'.anim",   true),',
          '        walk   = loadAnim(figure, "walk '+internal+'.anim",   true),',
          '        sprint = loadAnim(figure, "sprint '+internal+'.anim", true),',
          '        jump   = loadAnim(figure, "jump '+internal+'.anim",   true),'].join('\n');
 
-    const actionAnimsLua = actionA.map(a => `        ["${a.name}"] = loadAnim(figure, "${a.animFile||a.name+' '+internal+'.anim'}", false),`).join('\n');
-    const flingLines = actionA.length ? actionA.map(a => `        ["${a.name}"] = ${a.fling?'true':'false'},`).join('\n') : '        -- no default attacks';
-    const configSw = actionA.map(a => `        Util_CreateSwitch(parent, "${a.name} flings", m.FlingEnabled["${a.name}"]).Changed:Connect(function(v) m.FlingEnabled["${a.name}"] = v end)`).join('\n') || '        -- no default attacks';
+    const actionAnimsLua = actionA.map(a => '        ["' + a.name + '"] = loadAnim(figure, "' + (a.animFile||a.name+' '+internal+'.anim') + '", false),').join('\n');
+    const flingLines = actionA.length ? actionA.map(a => '        ["' + a.name + '"] = ' + (a.fling?'true':'false') + ',').join('\n') : '        -- no default attacks';
+    const configSw = actionA.map(a => '        Util_CreateSwitch(parent, "' + a.name + ' flings", m.FlingEnabled["' + a.name + '"]).Changed:Connect(function(v) m.FlingEnabled["' + a.name + '"] = v end)').join('\n') || '        -- no default attacks';
 
-    const loopDecls = loopA.map(a => `    local snd_${san(a.name||a.baseRole||'x'+a.id)} = nil`).join('\n');
-    const loopInits = loopA.map(a => `    snd_${san(a.name||a.baseRole||'x'+a.id)} = makeSound("${a.loopFile}", hrp, ${parseFloat(a.loopVol)||0.8}, false)`).join('\n');
-    const loopDestroys = loopA.map(a => { const s = `snd_${san(a.name||a.baseRole||'x'+a.id)}`; return `    if ${s} then ${s}:Stop() ${s}:Destroy() ${s} = nil end`; }).join('\n');
-    const stopActSounds = actionA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = `snd_${san(a.name||'x'+a.id)}`; return `        if ${s} then ${s}:Stop() end`; }).join('\n') || '        -- no per-action sounds';
-    const playActSound = actionA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = `snd_${san(a.name||'x'+a.id)}`; return `        if name == "${a.name}" and ${s} then ${s}:Play() end`; }).join('\n');
-    const baseSoundSetBase = baseA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = `snd_${san(a.baseRole||'x'+a.id)}`; return `        if state == "${a.baseRole}" then\n            if ${s} and not ${s}.IsPlaying then ${s}:Play() end\n        else\n            if ${s} then ${s}:Stop() end\n        end`; }).join('\n');
+    const loopDecls = loopA.map(a => '    local snd_' + san(a.name||a.baseRole||'x'+a.id) + ' = nil').join('\n');
+    const loopInits = loopA.map(a => '    snd_' + san(a.name||a.baseRole||'x'+a.id) + ' = makeSound("' + a.loopFile + '", hrp, ' + (parseFloat(a.loopVol)||0.8) + ', false)').join('\n');
+    const loopDestroys = loopA.map(a => { const s = 'snd_' + san(a.name||a.baseRole||'x'+a.id); return '    if ' + s + ' then ' + s + ':Stop() ' + s + ':Destroy() ' + s + ' = nil end'; }).join('\n');
+    const stopActSounds = actionA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = 'snd_' + san(a.name||'x'+a.id); return '        if ' + s + ' then ' + s + ':Stop() end'; }).join('\n') || '        -- no per-action sounds';
+    const playActSound = actionA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = 'snd_' + san(a.name||'x'+a.id); return '        if name == "' + a.name + '" and ' + s + ' then ' + s + ':Play() end'; }).join('\n');
+    const baseSoundSetBase = baseA.filter(a => a.loopAudio && a.loopFile).map(a => { const s = 'snd_' + san(a.baseRole||'x'+a.id); return '        if state == "' + a.baseRole + '" then\n            if ' + s + ' and not ' + s + '.IsPlaying then ' + s + ':Play() end\n        else\n            if ' + s + ' then ' + s + ':Stop() end\n        end'; }).join('\n');
 
-    const btnBinds = actionA.map(a => `
-        ContextActions:BindAction("GM_${a.name}", function(_, inputState, _)
-            if inputState == Enum.UserInputState.Begin then playAction("${a.name}") end
-        end, true, Enum.KeyCode.${a.key})
-        ContextActions:SetTitle("GM_${a.name}", "${a.btnLabel||a.name}")
-        ContextActions:SetPosition("GM_${a.name}", UDim2.new(${parseFloat(a.btnPX)||1}, ${parseInt(a.btnOX)||-230}, ${parseFloat(a.btnPY)||1}, ${parseInt(a.btnOY)||-130}))`).join('\n');
-    const btnUnbinds = actionA.map(a => `        ContextActions:UnbindAction("GM_${a.name}")`).join('\n');
+    const btnBinds = actionA.map(a => '\n        ContextActions:BindAction("GM_' + a.name + '", function(_, inputState, _)\n            if inputState == Enum.UserInputState.Begin then playAction("' + a.name + '") end\n        end, true, Enum.KeyCode.' + a.key + ')\n        ContextActions:SetTitle("GM_' + a.name + '", "' + (a.btnLabel||a.name) + '")\n        ContextActions:SetPosition("GM_' + a.name + '", UDim2.new(' + (parseFloat(a.btnPX)||1) + ', ' + (parseInt(a.btnOX)||-230) + ', ' + (parseFloat(a.btnPY)||1) + ', ' + (parseInt(a.btnOY)||-130) + '))').join('\n');
+    const btnUnbinds = actionA.map(a => '        ContextActions:UnbindAction("GM_' + a.name + '")').join('\n');
 
     const hitboxFn = hasHitbox ?
-`    local function fireHitbox(anchorName, fwdOffset, upOffset, shapeType, radius)
-        local anchor = figureRef and figureRef:FindFirstChild(anchorName)
-            or figureRef and figureRef:FindFirstChild("HumanoidRootPart")
-        if not anchor then return end
-        local pos = anchor.CFrame * CFrame.new(0, upOffset, fwdOffset)
-        local hitPos = pos.Position
-        if m.HitboxDebug then
-            local vis = Instance.new("Part")
-            vis.Name = RandomString()
-            vis.CastShadow = false
-            vis.Material = Enum.Material.ForceField
-            vis.Anchored = true
-            vis.CanCollide = false
-            vis.CanTouch = false
-            vis.CanQuery = false
-            vis.Color = Color3.new(${hbColorR}, ${hbColorG}, ${hbColorB})
-            vis.Size = Vector3.one * radius * 2
-            vis.Shape = shapeType == "Sphere" and Enum.PartType.Ball or Enum.PartType.Block
-            vis.CFrame = pos
-            vis.Parent = workspace
-            Debris:AddItem(vis, 1)
-        end
-        local parts = shapeType == "Sphere"
-            and workspace:GetPartBoundsInRadius(hitPos, radius)
-            or  workspace:GetPartBoundsInBox(pos, Vector3.one * radius * 2)
-        for _, part in parts do
-            if part.Parent then
-                local hum = part.Parent:FindFirstChildOfClass("Humanoid")
-                if hum and hum.RootPart and not hum.RootPart:IsGrounded() then
-                    ReanimateFling(part.Parent)
-                end
-            end
-        end
-    end
-` : '';
+'    local function fireHitbox(anchorName, fwdOffset, upOffset, shapeType, radius)\n' +
+'        local anchor = figureRef and figureRef:FindFirstChild(anchorName)\n' +
+'            or figureRef and figureRef:FindFirstChild("HumanoidRootPart")\n' +
+'        if not anchor then return end\n' +
+'        local pos = anchor.CFrame * CFrame.new(0, upOffset, fwdOffset)\n' +
+'        local hitPos = pos.Position\n' +
+'        if m.HitboxDebug then\n' +
+'            local vis = Instance.new("Part")\n' +
+'            vis.Name = RandomString()\n' +
+'            vis.CastShadow = false\n' +
+'            vis.Material = Enum.Material.ForceField\n' +
+'            vis.Anchored = true\n' +
+'            vis.CanCollide = false\n' +
+'            vis.CanTouch = false\n' +
+'            vis.CanQuery = false\n' +
+'            vis.Color = Color3.new(' + hbColorR + ', ' + hbColorG + ', ' + hbColorB + ')\n' +
+'            vis.Size = Vector3.one * radius * 2\n' +
+'            vis.Shape = shapeType == "Sphere" and Enum.PartType.Ball or Enum.PartType.Block\n' +
+'            vis.CFrame = pos\n' +
+'            vis.Parent = workspace\n' +
+'            Debris:AddItem(vis, 1)\n' +
+'        end\n' +
+'        local parts = shapeType == "Sphere"\n' +
+'            and workspace:GetPartBoundsInRadius(hitPos, radius)\n' +
+'            or  workspace:GetPartBoundsInBox(pos, Vector3.one * radius * 2)\n' +
+'        for _, part in parts do\n' +
+'            if part.Parent then\n' +
+'                local hum = part.Parent:FindFirstChildOfClass("Humanoid")\n' +
+'                if hum and hum.RootPart and not hum.RootPart:IsGrounded() then\n' +
+'                    ReanimateFling(part.Parent)\n' +
+'                end\n' +
+'            end\n' +
+'        end\n' +
+'    end\n' : '';
 
     const makeHbCall = (a, prefix) => {
       if (!a.hbOn || !a.fling) return '';
       const delay = parseFloat(a.hbDur) || 0;
-      const call = `${prefix}fireHitbox("${a.hbAnchor||'HumanoidRootPart'}", ${parseFloat(a.hbFwd)||0}, ${parseFloat(a.hbUp)||0}, "${a.hbShape||'Sphere'}", ${parseFloat(a.hbRadius)||4})`;
-      if (delay > 0) return `${prefix}task.delay(${delay}, function() ${call} end)`;
+      const call = prefix + 'fireHitbox("' + (a.hbAnchor||'HumanoidRootPart') + '", ' + (parseFloat(a.hbFwd)||0) + ', ' + (parseFloat(a.hbUp)||0) + ', "' + (a.hbShape||'Sphere') + '", ' + (parseFloat(a.hbRadius)||4) + ')';
+      if (delay > 0) return prefix + 'task.delay(' + delay + ', function() ' + call + ' end)';
       return call;
     };
 
     const modeAnimTables = hasModes ? modes.map((mo, i) => {
       const lines = [];
-      if (mo.transAnim) lines.push(`            trans = loadAnim(figure, "${mo.transAnim}", false),`);
-      if (mo.idleAnim)  lines.push(`            idle  = loadAnim(figure, "${mo.idleAnim}", true),`);
-      if (mo.walkAnim)  lines.push(`            walk  = loadAnim(figure, "${mo.walkAnim}", true),`);
-      if (mo.sprintAnim)lines.push(`            sprint= loadAnim(figure, "${mo.sprintAnim}", true),`);
-      if (mo.jumpAnim)  lines.push(`            jump  = loadAnim(figure, "${mo.jumpAnim}", true),`);
+      if (mo.transAnim) lines.push('            trans = loadAnim(figure, "' + mo.transAnim + '", false),');
+      if (mo.idleAnim)  lines.push('            idle  = loadAnim(figure, "' + mo.idleAnim + '", true),');
+      if (mo.walkAnim)  lines.push('            walk  = loadAnim(figure, "' + mo.walkAnim + '", true),');
+      if (mo.sprintAnim)lines.push('            sprint= loadAnim(figure, "' + mo.sprintAnim + '", true),');
+      if (mo.jumpAnim)  lines.push('            jump  = loadAnim(figure, "' + mo.jumpAnim + '", true),');
       mo.attacks.filter(a => a.name.trim()).forEach(a => {
-        lines.push(`            action_${san(a.name)} = loadAnim(figure, "${a.animFile||a.name+'_mode.anim'}", false),`);
+        lines.push('            action_' + san(a.name) + ' = loadAnim(figure, "' + (a.animFile||a.name+'_mode.anim') + '", false),');
       });
-      return lines.length ? `        modeAnims[${i+1}] = {\n${lines.join('\n')}\n        }` : `        modeAnims[${i+1}] = {}`;
+      return lines.length ? '        modeAnims[' + (i+1) + '] = {\n' + lines.join('\n') + '\n        }' : '        modeAnims[' + (i+1) + '] = {}';
     }).join('\n') : '';
 
     const modeBinds = hasModes ? modes.map((mo, i) => {
       const modeAtkBinds = mo.attacks.filter(a => a.name.trim()).map(a =>
-        `            ContextActions:BindAction("GM_M${i+1}_${a.name}", function(_, inputState, _)
-                if inputState == Enum.UserInputState.Begin then playModeAction(${i+1}, "${a.name}") end
-            end, true, Enum.KeyCode.${a.key})
-            ContextActions:SetTitle("GM_M${i+1}_${a.name}", "${a.btnLabel||a.name}")
-            ContextActions:SetPosition("GM_M${i+1}_${a.name}", UDim2.new(${parseFloat(a.btnPX)||1}, ${parseInt(a.btnOX)||-230}, ${parseFloat(a.btnPY)||1}, ${parseInt(a.btnOY)||-130}))`
+        '            ContextActions:BindAction("GM_M' + (i+1) + '_' + a.name + '", function(_, inputState, _)\n' +
+        '                if inputState == Enum.UserInputState.Begin then playModeAction(' + (i+1) + ', "' + a.name + '") end\n' +
+        '            end, true, Enum.KeyCode.' + a.key + ')\n' +
+        '            ContextActions:SetTitle("GM_M' + (i+1) + '_' + a.name + '", "' + (a.btnLabel||a.name) + '")\n' +
+        '            ContextActions:SetPosition("GM_M' + (i+1) + '_' + a.name + '", UDim2.new(' + (parseFloat(a.btnPX)||1) + ', ' + (parseInt(a.btnOX)||-230) + ', ' + (parseFloat(a.btnPY)||1) + ', ' + (parseInt(a.btnOY)||-130) + '))'
       ).join('\n');
       const modeAtkUnbinds = mo.attacks.filter(a => a.name.trim()).map(a =>
-        `            ContextActions:UnbindAction("GM_M${i+1}_${a.name}")`
+        '            ContextActions:UnbindAction("GM_M' + (i+1) + '_' + a.name + '")'
       ).join('\n');
       const transDur = parseFloat(mo.transDur) || 0.5;
-      return `
-        ContextActions:BindAction("GM_Mode${i+1}", function(_, inputState, _)
-            if inputState ~= Enum.UserInputState.Begin then return end
-            if currentMode == ${i+1} then
-                currentMode = 0
-                currentBase = "none"
-                clearBase()
-                ContextActions:SetTitle("GM_Mode${i+1}", "${escLua(mo.btnLabel||mo.name)}")
-                ${modeAtkUnbinds}
-                bindDefaultAttacks()
-            else
-                currentMode = ${i+1}
-                currentBase = "none"
-                clearBase()
-                ContextActions:SetTitle("GM_Mode${i+1}", "▶ ${escLua(mo.name)}")
-                unbindDefaultAttacks()
-                ${modeAtkBinds}
-                ${mo.transAnim ? `-- play transition animation
-                local ta = modeAnims[${i+1}] and modeAnims[${i+1}].trans
-                if ta then
-                    ta.weight = 1
-                    actionStart[ta] = os.clock()
-                    task.delay(${transDur}, function()
-                        if currentMode == ${i+1} then ta.weight = 0 end
-                    end)
-                end` : ''}
-            end
-        end, true, Enum.KeyCode.${mo.key})
-        ContextActions:SetTitle("GM_Mode${i+1}", "${escLua(mo.btnLabel||mo.name)}")
-        ContextActions:SetPosition("GM_Mode${i+1}", UDim2.new(${parseFloat(mo.btnPX)||1}, ${parseInt(mo.btnOX)||-80}, ${parseFloat(mo.btnPY)||1}, ${parseInt(mo.btnOY)||-130}))`;
+      return '\n        ContextActions:BindAction("GM_Mode' + (i+1) + '", function(_, inputState, _)\n' +
+        '            if inputState ~= Enum.UserInputState.Begin then return end\n' +
+        '            if currentMode == ' + (i+1) + ' then\n' +
+        '                currentMode = 0\n' +
+        '                currentBase = "none"\n' +
+        '                clearBase()\n' +
+        '                ContextActions:SetTitle("GM_Mode' + (i+1) + '", "' + escLua(mo.btnLabel||mo.name) + '")\n' +
+        '                ' + modeAtkUnbinds + '\n' +
+        '                bindDefaultAttacks()\n' +
+        '            else\n' +
+        '                currentMode = ' + (i+1) + '\n' +
+        '                currentBase = "none"\n' +
+        '                clearBase()\n' +
+        '                ContextActions:SetTitle("GM_Mode' + (i+1) + '", "▶ ' + escLua(mo.name) + '")\n' +
+        '                unbindDefaultAttacks()\n' +
+        '                ' + modeAtkBinds + '\n' +
+        (mo.transAnim ?
+        '                local ta = modeAnims[' + (i+1) + '] and modeAnims[' + (i+1) + '].trans\n' +
+        '                if ta then\n' +
+        '                    ta.weight = 1\n' +
+        '                    actionStart[ta] = os.clock()\n' +
+        '                    task.delay(' + transDur + ', function()\n' +
+        '                        if currentMode == ' + (i+1) + ' then ta.weight = 0 end\n' +
+        '                    end)\n' +
+        '                end\n' : '') +
+        '            end\n' +
+        '        end, true, Enum.KeyCode.' + mo.key + ')\n' +
+        '        ContextActions:SetTitle("GM_Mode' + (i+1) + '", "' + escLua(mo.btnLabel||mo.name) + '")\n' +
+        '        ContextActions:SetPosition("GM_Mode' + (i+1) + '", UDim2.new(' + (parseFloat(mo.btnPX)||1) + ', ' + (parseInt(mo.btnOX)||-80) + ', ' + (parseFloat(mo.btnPY)||1) + ', ' + (parseInt(mo.btnOY)||-130) + '))';
     }).join('\n') : '';
 
-    const modeUnbinds = hasModes ? modes.map((_,i) => `        ContextActions:UnbindAction("GM_Mode${i+1}")`).join('\n') : '';
+    const modeUnbinds = hasModes ? modes.map((_,i) => '        ContextActions:UnbindAction("GM_Mode' + (i+1) + '")').join('\n') : '';
     const modeSetBaseExtra = hasModes ?
-`        local mOver = modeAnims[currentMode]
-        if mOver and mOver[state] then
-            mOver[state].weight = 1
-            return
-        end` : '';
+'        local mOver = modeAnims[currentMode]\n' +
+'        if mOver and mOver[state] then\n' +
+'            mOver[state].weight = 1\n' +
+'            return\n' +
+'        end' : '';
 
     const modeActionFn = hasModes ?
-`    local function playModeAction(modeIdx, name)
-        if currentAction then return end
-        local ma = modeAnims[modeIdx]
-        if not ma then return end
-        local a = ma["action_"..name]
-        if not a then return end
-        stopAction()
-        a.weight = 1
-        actionStart[a] = os.clock()
-        currentAction = name
-        flingActive = true
-        ${modes.flatMap((mo,i) => mo.attacks.filter(a => a.name.trim() && a.hbOn && a.fling).map(a =>
-          `        if modeIdx == ${i+1} and name == "${a.name}" then\n            ${makeHbCall(a, '            ')}\n        end`
-        )).join('\n')}
-    end
-` : '';
+'    local function playModeAction(modeIdx, name)\n' +
+'        if currentAction then return end\n' +
+'        local ma = modeAnims[modeIdx]\n' +
+'        if not ma then return end\n' +
+'        local a = ma["action_"..name]\n' +
+'        if not a then return end\n' +
+'        stopAction()\n' +
+'        a.weight = 1\n' +
+'        actionStart[a] = os.clock()\n' +
+'        currentAction = name\n' +
+'        flingActive = true\n' +
+        modes.flatMap((mo,i) => mo.attacks.filter(a => a.name.trim() && a.hbOn && a.fling).map(a =>
+          '        if modeIdx == ' + (i+1) + ' and name == "' + a.name + '" then\n' + makeHbCall(a, '            ') + '\n        end'
+        )).join('\n') + '\n' +
+'    end\n' : '';
 
     const modeActionUpdateCheck = hasModes ?
-`            if currentMode > 0 and currentAction then
-                local ma = modeAnims[currentMode]
-                local ca = ma and ma["action_"..tostring(currentAction)]
-                if ca and actionStart[ca] then
-                    local elapsed  = os.clock() - actionStart[ca]
-                    local duration = ca.track and ca.track.Time or 0
-                    if duration > 0 and elapsed >= duration / (ca.speed or 1) then
-                        ca.weight     = 0
-                        stopAllAnimSounds()
-                        currentAction = nil
-                        flingActive   = false
-                        currentBase   = "none"
-                    end
-                    return
-                end
-            end
-` : '';
+'            if currentMode > 0 and currentAction then\n' +
+'                local ma = modeAnims[currentMode]\n' +
+'                local ca = ma and ma["action_"..tostring(currentAction)]\n' +
+'                if ca and actionStart[ca] then\n' +
+'                    local elapsed  = os.clock() - actionStart[ca]\n' +
+'                    local duration = ca.track and ca.track.Time or 0\n' +
+'                    if duration > 0 and elapsed >= duration / (ca.speed or 1) then\n' +
+'                        ca.weight     = 0\n' +
+'                        stopAllAnimSounds()\n' +
+'                        currentAction = nil\n' +
+'                        flingActive   = false\n' +
+'                        currentBase   = "none"\n' +
+'                    end\n' +
+'                    return\n' +
+'                end\n' +
+'            end\n' : '';
 
     const bindDefaultAtksBody = actionA.map(a =>
-`        ContextActions:BindAction("GM_${a.name}", function(_, inputState, _)
-            if inputState == Enum.UserInputState.Begin then playAction("${a.name}") end
-        end, true, Enum.KeyCode.${a.key})
-        ContextActions:SetTitle("GM_${a.name}", "${a.btnLabel||a.name}")
-        ContextActions:SetPosition("GM_${a.name}", UDim2.new(${parseFloat(a.btnPX)||1}, ${parseInt(a.btnOX)||-230}, ${parseFloat(a.btnPY)||1}, ${parseInt(a.btnOY)||-130}))`
+'        ContextActions:BindAction("GM_' + a.name + '", function(_, inputState, _)\n' +
+'            if inputState == Enum.UserInputState.Begin then playAction("' + a.name + '") end\n' +
+'        end, true, Enum.KeyCode.' + a.key + ')\n' +
+'        ContextActions:SetTitle("GM_' + a.name + '", "' + (a.btnLabel||a.name) + '")\n' +
+'        ContextActions:SetPosition("GM_' + a.name + '", UDim2.new(' + (parseFloat(a.btnPX)||1) + ', ' + (parseInt(a.btnOX)||-230) + ', ' + (parseFloat(a.btnPY)||1) + ', ' + (parseInt(a.btnOY)||-130) + '))'
     ).join('\n');
-    const unbindDefaultAtksBody = actionA.map(a => `        ContextActions:UnbindAction("GM_${a.name}")`).join('\n');
+    const unbindDefaultAtksBody = actionA.map(a => '        ContextActions:UnbindAction("GM_' + a.name + '")').join('\n');
 
     // Build final code
     const L = [];
     const ln = s => L.push(s);
     const lnif = (c, s) => { if (c) L.push(s); };
 
-    ln(`-- ${internal}.lua`);
-    ln(`-- Generated by Moveset Creator v6`);
-    ln(`-- Place in: UhhhhhhReanim/Modules/${internal}.lua`);
-    ln(``);
-    ln(`cloneref = cloneref or function(o) return o end`);
-    ln(``);
-    ln(`local Debris     = cloneref(game:GetService("Debris"))`);
-    ln(`local RunService = cloneref(game:GetService("RunService"))`);
-    ln(``);
-    ln(`local modules = {}`);
-    ln(`local function AddModule(m)`);
-    ln(`    table.insert(modules, m)`);
-    ln(`end`);
-    ln(``);
-    ln(`AddModule(function()`);
-    ln(`    local m = {}`);
-    ln(`    m.ModuleType   = "MOVESET"`);
-    ln(`    m.Name         = "${name}"`);
-    ln(`    m.Description  = "${desc}"`);
-    ln(`    m.InternalName = "${internal}"`);
-    if (hbDebugOn) ln(`    m.HitboxDebug  = false`);
-    if (chatOn) ln(`    m.Notifications = true`);
-    ln(``);
-    ln(`    m.Assets = {`);
-    if (uniqueFiles.length) uniqueFiles.forEach(f => ln(`        "${f}",`));
-    else ln(`        -- no assets configured`);
-    ln(`    }`);
-    ln(``);
-    ln(`    m.FlingEnabled = {`);
+    ln('-- ' + internal + '.lua');
+    ln('-- Generated by Moveset Creator v6');
+    ln('-- Place in: UhhhhhhReanim/Modules/' + internal + '.lua');
+    ln('');
+    ln('cloneref = cloneref or function(o) return o end');
+    ln('');
+    ln('local Debris     = cloneref(game:GetService("Debris"))');
+    ln('local RunService = cloneref(game:GetService("RunService"))');
+    ln('');
+    ln('local modules = {}');
+    ln('local function AddModule(m)');
+    ln('    table.insert(modules, m)');
+    ln('end');
+    ln('');
+    ln('AddModule(function()');
+    ln('    local m = {}');
+    ln('    m.ModuleType   = "MOVESET"');
+    ln('    m.Name         = "' + name + '"');
+    ln('    m.Description  = "' + desc + '"');
+    ln('    m.InternalName = "' + internal + '"');
+    if (hbDebugOn) ln('    m.HitboxDebug  = false');
+    if (chatOn) ln('    m.Notifications = true');
+    ln('');
+    ln('    m.Assets = {');
+    if (uniqueFiles.length) uniqueFiles.forEach(f => ln('        "' + f + '",'));
+    else ln('        -- no assets configured');
+    ln('    }');
+    ln('');
+    ln('    m.FlingEnabled = {');
     ln(flingLines);
-    ln(`    }`);
-    ln(``);
-    ln(`    m.Config = function(parent)`);
-    ln(`        Util_CreateText(parent, "${name}", 18, Enum.TextXAlignment.Center)`);
-    ln(`        Util_CreateSeparator(parent)`);
-    ln(`        Util_CreateText(parent, "Fling on Hit", 15, Enum.TextXAlignment.Center)`);
+    ln('    }');
+    ln('');
+    ln('    m.Config = function(parent)');
+    ln('        Util_CreateText(parent, "' + name + '", 18, Enum.TextXAlignment.Center)');
+    ln('        Util_CreateSeparator(parent)');
+    ln('        Util_CreateText(parent, "Fling on Hit", 15, Enum.TextXAlignment.Center)');
     ln(configSw);
     if (hbDebugOn) {
-      ln(`        Util_CreateSeparator(parent)`);
-      ln(`        Util_CreateSwitch(parent, "Hitbox Visual", m.HitboxDebug).Changed:Connect(function(v)`);
-      ln(`            m.HitboxDebug = v`);
-      ln(`        end)`);
+      ln('        Util_CreateSeparator(parent)');
+      ln('        Util_CreateSwitch(parent, "Hitbox Visual", m.HitboxDebug).Changed:Connect(function(v)');
+      ln('            m.HitboxDebug = v');
+      ln('        end)');
     }
     if (chatOn) {
-      ln(`        Util_CreateSeparator(parent)`);
-      ln(`        Util_CreateSwitch(parent, "Text Notifications", m.Notifications).Changed:Connect(function(v)`);
-      ln(`            m.Notifications = v`);
-      ln(`        end)`);
+      ln('        Util_CreateSeparator(parent)');
+      ln('        Util_CreateSwitch(parent, "Text Notifications", m.Notifications).Changed:Connect(function(v)');
+      ln('            m.Notifications = v');
+      ln('        end)');
     }
-    ln(`    end`);
-    ln(``);
-    ln(`    m.SaveConfig = function()`);
-    ln(`        local t = { FlingEnabled = m.FlingEnabled }`);
-    lnif(hbDebugOn, `        t.HitboxDebug = m.HitboxDebug`);
-    lnif(chatOn, `        t.Notifications = m.Notifications`);
-    ln(`        return t`);
-    ln(`    end`);
-    ln(``);
-    ln(`    m.LoadConfig = function(save)`);
-    ln(`        if type(save.FlingEnabled) == "table" then`);
-    ln(`            for k, v in pairs(save.FlingEnabled) do`);
-    ln(`                if m.FlingEnabled[k] ~= nil then m.FlingEnabled[k] = v end`);
-    ln(`            end`);
-    ln(`        end`);
-    lnif(hbDebugOn, `        if save.HitboxDebug ~= nil then m.HitboxDebug = save.HitboxDebug end`);
-    lnif(chatOn, `        if save.Notifications ~= nil then m.Notifications = save.Notifications end`);
-    ln(`    end`);
-    ln(``);
-    ln(`    -- STATE`);
-    ln(`    local baseAnims    = {}`);
-    ln(`    local actionAnims  = {}`);
-    ln(`    local animJump     = nil`);
-    ln(`    local actionStart  = {}`);
-    ln(`    local currentBase   = "idle"`);
-    ln(`    local currentAction = nil`);
-    ln(`    local wasInAir      = false`);
-    ln(`    local flingActive   = false`);
-    ln(`    local touchConns    = {}`);
-    ln(`    local allJoints     = {}`);
-    ln(`    local figureRef     = nil`);
-    ln(`    local SPEED_WALK    = ${speedWalk}`);
-    ln(`    local SPEED_SPRINT  = ${speedSprint}`);
-    lnif(hasSprint, `    local isSprinting   = false`);
-    lnif(hasBg, `    local bgSound       = nil`);
-    lnif(hasModes, `    local currentMode   = 0`);
-    lnif(hasModes, `    local modeAnims     = {}`);
-    lnif(chatOn, `    local chatConn      = nil`);
-    if (hasLoop) { ln(`    -- Per-animation sounds`); ln(loopDecls); }
-    ln(``);
-    ln(`    -- HELPERS`);
-    ln(`    local function makeSound(filename, parent, volume, looped)`);
-    ln(`        local s = Instance.new("Sound")`);
-    ln(`        s.SoundId = AssetGetContentId(filename)`);
-    ln(`        s.Volume  = volume or 0.8`);
-    ln(`        s.Looped  = looped or false`);
-    ln(`        s.Parent  = parent`);
-    ln(`        return s`);
-    ln(`    end`);
-    ln(``);
-    ln(`    local function loadAnim(fig, file, looped)`);
-    ln(`        local a = AnimLib.Animator.new()`);
-    ln(`        a.rig    = fig`);
-    ln(`        a.track  = AnimLib.Track.fromfile(AssetGetPathFromFilename(file))`);
-    ln(`        a.looped = looped or false`);
-    ln(`        a.speed  = 1`);
-    ln(`        a.weight = 0`);
-    ln(`        return a`);
-    ln(`    end`);
-    ln(``);
-    ln(`    local function setSpeed(speed)`);
-    ln(`        if not figureRef then return end`);
-    ln(`        local hum = figureRef:FindFirstChildOfClass("Humanoid")`);
-    ln(`        if hum then hum.WalkSpeed = speed end`);
-    ln(`    end`);
-    ln(``);
-    ln(`    local function clearBase()`);
-    ln(`        for _, a in pairs(baseAnims) do a.weight = 0 end`);
-    if (hasModes) ln(`        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight then a.weight=0 end end end`);
-    ln(`    end`);
-    ln(``);
-    ln(`    local function setBase(state)`);
-    ln(`        if currentBase == state then return end`);
-    ln(`        currentBase = state`);
-    ln(`        clearBase()`);
+    ln('    end');
+    ln('');
+    ln('    m.SaveConfig = function()');
+    ln('        local t = { FlingEnabled = m.FlingEnabled }');
+    lnif(hbDebugOn, '        t.HitboxDebug = m.HitboxDebug');
+    lnif(chatOn, '        t.Notifications = m.Notifications');
+    ln('        return t');
+    ln('    end');
+    ln('');
+    ln('    m.LoadConfig = function(save)');
+    ln('        if type(save.FlingEnabled) == "table" then');
+    ln('            for k, v in pairs(save.FlingEnabled) do');
+    ln('                if m.FlingEnabled[k] ~= nil then m.FlingEnabled[k] = v end');
+    ln('            end');
+    ln('        end');
+    lnif(hbDebugOn, '        if save.HitboxDebug ~= nil then m.HitboxDebug = save.HitboxDebug end');
+    lnif(chatOn, '        if save.Notifications ~= nil then m.Notifications = save.Notifications end');
+    ln('    end');
+    ln('');
+    ln('    -- STATE');
+    ln('    local baseAnims    = {}');
+    ln('    local actionAnims  = {}');
+    ln('    local animJump     = nil');
+    ln('    local actionStart  = {}');
+    ln('    local currentBase   = "idle"');
+    ln('    local currentAction = nil');
+    ln('    local wasInAir      = false');
+    ln('    local flingActive   = false');
+    ln('    local touchConns    = {}');
+    ln('    local allJoints     = {}');
+    ln('    local figureRef     = nil');
+    ln('    local SPEED_WALK    = ' + speedWalk);
+    ln('    local SPEED_SPRINT  = ' + speedSprint);
+    lnif(hasSprint, '    local isSprinting   = false');
+    lnif(hasBg, '    local bgSound       = nil');
+    lnif(hasModes, '    local currentMode   = 0');
+    lnif(hasModes, '    local modeAnims     = {}');
+    lnif(chatOn, '    local chatConn      = nil');
+    if (hasLoop) { ln('    -- Per-animation sounds'); ln(loopDecls); }
+    ln('');
+    ln('    -- HELPERS');
+    ln('    local function makeSound(filename, parent, volume, looped)');
+    ln('        local s = Instance.new("Sound")');
+    ln('        s.SoundId = AssetGetContentId(filename)');
+    ln('        s.Volume  = volume or 0.8');
+    ln('        s.Looped  = looped or false');
+    ln('        s.Parent  = parent');
+    ln('        return s');
+    ln('    end');
+    ln('');
+    ln('    local function loadAnim(fig, file, looped)');
+    ln('        local a = AnimLib.Animator.new()');
+    ln('        a.rig    = fig');
+    ln('        a.track  = AnimLib.Track.fromfile(AssetGetPathFromFilename(file))');
+    ln('        a.looped = looped or false');
+    ln('        a.speed  = 1');
+    ln('        a.weight = 0');
+    ln('        return a');
+    ln('    end');
+    ln('');
+    ln('    local function setSpeed(speed)');
+    ln('        if not figureRef then return end');
+    ln('        local hum = figureRef:FindFirstChildOfClass("Humanoid")');
+    ln('        if hum then hum.WalkSpeed = speed end');
+    ln('    end');
+    ln('');
+    ln('    local function clearBase()');
+    ln('        for _, a in pairs(baseAnims) do a.weight = 0 end');
+    if (hasModes) ln('        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight then a.weight=0 end end end');
+    ln('    end');
+    ln('');
+    ln('    local function setBase(state)');
+    ln('        if currentBase == state then return end');
+    ln('        currentBase = state');
+    ln('        clearBase()');
     if (hasModes) { ln(modeSetBaseExtra); }
-    ln(`        if baseAnims[state] then baseAnims[state].weight = 1 end`);
-    if (baseSoundSetBase) { ln(`        -- Per-base audio`); ln(baseSoundSetBase); }
-    ln(`    end`);
-    ln(``);
-    ln(`    local function stopAllAnimSounds()`);
+    ln('        if baseAnims[state] then baseAnims[state].weight = 1 end');
+    if (baseSoundSetBase) { ln('        -- Per-base audio'); ln(baseSoundSetBase); }
+    ln('    end');
+    ln('');
+    ln('    local function stopAllAnimSounds()');
     ln(stopActSounds);
-    ln(`    end`);
-    ln(``);
-    ln(`    local function stopAction()`);
-    ln(`        for _, anim in pairs(actionAnims) do anim.weight = 0 end`);
-    if (hasModes) ln(`        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight then a.weight=0 end end end`);
-    ln(`        stopAllAnimSounds()`);
-    ln(`        currentAction = nil`);
-    ln(`        flingActive   = false`);
-    ln(`    end`);
-    ln(``);
+    ln('    end');
+    ln('');
+    ln('    local function stopAction()');
+    ln('        for _, anim in pairs(actionAnims) do anim.weight = 0 end');
+    if (hasModes) ln('        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight then a.weight=0 end end end');
+    ln('        stopAllAnimSounds()');
+    ln('        currentAction = nil');
+    ln('        flingActive   = false');
+    ln('    end');
+    ln('');
     if (hasModes) {
-      ln(`    local function bindDefaultAttacks()`);
-      ln(bindDefaultAtksBody || `        -- no default attacks`);
-      ln(`    end`);
-      ln(`    local function unbindDefaultAttacks()`);
-      ln(unbindDefaultAtksBody || `        -- no default attacks`);
-      ln(`    end`);
-      ln(``);
+      ln('    local function bindDefaultAttacks()');
+      ln(bindDefaultAtksBody || '        -- no default attacks');
+      ln('    end');
+      ln('    local function unbindDefaultAttacks()');
+      ln(unbindDefaultAtksBody || '        -- no default attacks');
+      ln('    end');
+      ln('');
     }
-    ln(`    local function playAction(name)`);
-    ln(`        if currentAction then return end`);
-    ln(`        local a = actionAnims[name]`);
-    ln(`        if not a then return end`);
-    ln(`        stopAction()`);
-    ln(`        a.weight       = 1`);
-    ln(`        actionStart[a] = os.clock()`);
-    ln(`        currentAction  = name`);
-    ln(`        flingActive    = m.FlingEnabled[name] == true`);
-    if (playActSound) { ln(`        -- per-action audio`); ln(playActSound); }
+    ln('    local function playAction(name)');
+    ln('        if currentAction then return end');
+    ln('        local a = actionAnims[name]');
+    ln('        if not a then return end');
+    ln('        stopAction()');
+    ln('        a.weight       = 1');
+    ln('        actionStart[a] = os.clock()');
+    ln('        currentAction  = name');
+    ln('        flingActive    = m.FlingEnabled[name] == true');
+    if (playActSound) { ln('        -- per-action audio'); ln(playActSound); }
     actionA.forEach(a => {
       if (!a.hbOn || !a.fling) return;
       const delay = parseFloat(a.hbDur) || 0;
-      ln(`        if name == "${a.name}" then`);
-      if (delay > 0) ln(`            task.delay(${delay}, function() fireHitbox("${a.hbAnchor||'HumanoidRootPart'}", ${parseFloat(a.hbFwd)||0}, ${parseFloat(a.hbUp)||0}, "${a.hbShape||'Sphere'}", ${parseFloat(a.hbRadius)||4}) end)`);
-      else ln(`            fireHitbox("${a.hbAnchor||'HumanoidRootPart'}", ${parseFloat(a.hbFwd)||0}, ${parseFloat(a.hbUp)||0}, "${a.hbShape||'Sphere'}", ${parseFloat(a.hbRadius)||4})`);
-      ln(`        end`);
+      ln('        if name == "' + a.name + '" then');
+      if (delay > 0) ln('            task.delay(' + delay + ', function() fireHitbox("' + (a.hbAnchor||'HumanoidRootPart') + '", ' + (parseFloat(a.hbFwd)||0) + ', ' + (parseFloat(a.hbUp)||0) + ', "' + (a.hbShape||'Sphere') + '", ' + (parseFloat(a.hbRadius)||4) + ') end)');
+      else ln('            fireHitbox("' + (a.hbAnchor||'HumanoidRootPart') + '", ' + (parseFloat(a.hbFwd)||0) + ', ' + (parseFloat(a.hbUp)||0) + ', "' + (a.hbShape||'Sphere') + '", ' + (parseFloat(a.hbRadius)||4) + ')');
+      ln('        end');
     });
-    ln(`    end`);
-    ln(``);
+    ln('    end');
+    ln('');
     if (hasModes) { ln(modeActionFn); }
     if (hasSprint) {
-      ln(`    local function toggleSprint()`);
-      ln(`        isSprinting = not isSprinting`);
-      ln(`        if isSprinting then`);
-      ln(`            setSpeed(SPEED_SPRINT)`);
-      ln(`            ContextActions:SetTitle("GM_Sprint", "${spLW}")`);
-      ln(`        else`);
-      ln(`            setSpeed(SPEED_WALK)`);
-      ln(`            ContextActions:SetTitle("GM_Sprint", "${spLS}")`);
-      ln(`        end`);
-      ln(`    end`);
-      ln(``);
+      ln('    local function toggleSprint()');
+      ln('        isSprinting = not isSprinting');
+      ln('        if isSprinting then');
+      ln('            setSpeed(SPEED_SPRINT)');
+      ln('            ContextActions:SetTitle("GM_Sprint", "' + spLW + '")');
+      ln('        else');
+      ln('            setSpeed(SPEED_WALK)');
+      ln('            ContextActions:SetTitle("GM_Sprint", "' + spLS + '")');
+      ln('        end');
+      ln('    end');
+      ln('');
     }
-    ln(`    local function setupFlingTouched(figure)`);
-    ln(`        local function hookPart(part)`);
-    ln(`            local conn = part.Touched:Connect(function(hit)`);
-    ln(`                if not flingActive then return end`);
-    ln(`                if not hit or not hit.Parent then return end`);
-    ln(`                local target = hit.Parent`);
-    ln(`                if target:IsA("Accessory") then target = target.Parent end`);
-    ln(`                if target == figure then return end`);
-    ln(`                if not target:FindFirstChildOfClass("Humanoid") then return end`);
-    ln(`                ReanimateFling(target)`);
-    ln(`            end)`);
-    ln(`            table.insert(touchConns, conn)`);
-    ln(`        end`);
-    ln(`        for _, part in ipairs(figure:GetDescendants()) do`);
-    ln(`            if part:IsA("BasePart") then hookPart(part) end`);
-    ln(`        end`);
-    ln(`        table.insert(touchConns, figure.DescendantAdded:Connect(function(part)`);
-    ln(`            if part:IsA("BasePart") then hookPart(part) end`);
-    ln(`        end))`);
-    ln(`    end`);
-    ln(``);
+    ln('    local function setupFlingTouched(figure)');
+    ln('        local function hookPart(part)');
+    ln('            local conn = part.Touched:Connect(function(hit)');
+    ln('                if not flingActive then return end');
+    ln('                if not hit or not hit.Parent then return end');
+    ln('                local target = hit.Parent');
+    ln('                if target:IsA("Accessory") then target = target.Parent end');
+    ln('                if target == figure then return end');
+    ln('                if not target:FindFirstChildOfClass("Humanoid") then return end');
+    ln('                ReanimateFling(target)');
+    ln('            end)');
+    ln('            table.insert(touchConns, conn)');
+    ln('        end');
+    ln('        for _, part in ipairs(figure:GetDescendants()) do');
+    ln('            if part:IsA("BasePart") then hookPart(part) end');
+    ln('        end');
+    ln('        table.insert(touchConns, figure.DescendantAdded:Connect(function(part)');
+    ln('            if part:IsA("BasePart") then hookPart(part) end');
+    ln('        end))');
+    ln('    end');
+    ln('');
     if (hasHitbox) ln(hitboxFn);
     if (chatOn) {
-      ln(`    -- Overhead chat text (HiddenGui typewriter)`);
-      ln(`    local function setupChat()`);
-      ln(`        chatConn = OnPlayerChatted(function(message)`);
-      ln(`            if not m.Notifications then return end`);
-      ln(`            local prefix = "${chatPrefix}"`);
-      ln(`            local text = Instance.new("TextLabel")`);
-      ln(`            text.Name = RandomString()`);
-      ln(`            text.Position = UDim2.new(0, 0, 0.95, 0)`);
-      ln(`            text.Size = UDim2.new(1, 0, 0.05, 0)`);
-      ln(`            text.BackgroundTransparency = 1`);
-      ln(`            text.Font = Enum.Font.GothamBold`);
-      ln(`            text.TextScaled = true`);
-      ln(`            text.TextColor3 = Color3.new(${chatR}, ${chatG}, ${chatB})`);
-      ln(`            text.TextStrokeTransparency = ${chatStroke?'0':'1'}`);
-      ln(`            text.TextXAlignment = Enum.TextXAlignment.Left`);
-      ln(`            text.Parent = HiddenGui`);
-      ln(`            task.spawn(function()`);
-      ln(`                local cps = ${chatCPS}`);
-      ln(`                local t = os.clock()`);
-      ln(`                local ll = 0`);
-      ln(`                repeat`);
-      ln(`                    task.wait()`);
-      ln(`                    local l = math.floor((os.clock() - t) * cps)`);
-      ln(`                    if l > ll then`);
-      ln(`                        ll = l`);
-      ln(`                        text.Text = prefix .. string.sub(message, 1, l)`);
-      ln(`                    end`);
-      ln(`                until ll >= #message`);
-      ln(`                text.Text = prefix .. message`);
+      ln('    -- Overhead chat text (HiddenGui typewriter)');
+      ln('    local function setupChat()');
+      ln('        chatConn = OnPlayerChatted(function(message)');
+      ln('            if not m.Notifications then return end');
+      ln('            local prefix = "' + chatPrefix + '"');
+      ln('            local text = Instance.new("TextLabel")');
+      ln('            text.Name = RandomString()');
+      ln('            text.Position = UDim2.new(0, 0, 0.95, 0)');
+      ln('            text.Size = UDim2.new(1, 0, 0.05, 0)');
+      ln('            text.BackgroundTransparency = 1');
+      ln('            text.Font = Enum.Font.GothamBold');
+      ln('            text.TextScaled = true');
+      ln('            text.TextColor3 = Color3.new(' + chatR + ', ' + chatG + ', ' + chatB + ')');
+      ln('            text.TextStrokeTransparency = ' + (chatStroke?'0':'1'));
+      ln('            text.TextXAlignment = Enum.TextXAlignment.Left');
+      ln('            text.Parent = HiddenGui');
+      ln('            task.spawn(function()');
+      ln('                local cps = ' + chatCPS);
+      ln('                local t = os.clock()');
+      ln('                local ll = 0');
+      ln('                repeat');
+      ln('                    task.wait()');
+      ln('                    local l = math.floor((os.clock() - t) * cps)');
+      ln('                    if l > ll then');
+      ln('                        ll = l');
+      ln('                        text.Text = prefix .. string.sub(message, 1, l)');
+      ln('                    end');
+      ln('                until ll >= #message');
+      ln('                text.Text = prefix .. message');
       if (chatFade > 0) {
-        ln(`                task.wait(${chatFade})`);
-        ln(`                text:Destroy()`);
+        ln('                task.wait(' + chatFade + ')');
+        ln('                text:Destroy()');
       }
-      ln(`            end)`);
-      ln(`        end)`);
-      ln(`    end`);
-      ln(``);
+      ln('            end)');
+      ln('        end)');
+      ln('    end');
+      ln('');
     }
-    ln(`    -- INIT`);
-    ln(`    m.Init = function(figure)`);
-    ln(`        figureRef = figure`);
-    ln(`        local hrp = figure:FindFirstChild("HumanoidRootPart") or figure`);
-    ln(`        local hum = figure:FindFirstChildOfClass("Humanoid")`);
-    ln(``);
-    ln(`        allJoints = {}`);
-    ln(`        for _, v in ipairs(figure:GetDescendants()) do`);
-    ln(`            if v:IsA("Motor6D") then table.insert(allJoints, v) end`);
-    ln(`        end`);
-    ln(``);
-    if (jumpPower.trim()) ln(`        if hum then hum.JumpPower = ${jumpPower} end`);
-    if (!allowClimb) ln(`        if hum then hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false) end`);
-    ln(``);
-    ln(`        baseAnims = {`);
+    ln('    -- INIT');
+    ln('    m.Init = function(figure)');
+    ln('        figureRef = figure');
+    ln('        local hrp = figure:FindFirstChild("HumanoidRootPart") or figure');
+    ln('        local hum = figure:FindFirstChildOfClass("Humanoid")');
+    ln('');
+    ln('        allJoints = {}');
+    ln('        for _, v in ipairs(figure:GetDescendants()) do');
+    ln('            if v:IsA("Motor6D") then table.insert(allJoints, v) end');
+    ln('        end');
+    ln('');
+    if (jumpPower.trim()) ln('        if hum then hum.JumpPower = ' + jumpPower + ' end');
+    if (!allowClimb) ln('        if hum then hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false) end');
+    ln('');
+    ln('        baseAnims = {');
     ln(baseAnimsLua);
-    ln(`        }`);
-    ln(`        animJump = baseAnims.jump`);
-    if (actionA.length) { ln(``); ln(`        actionAnims = {`); ln(actionAnimsLua); ln(`        }`); }
-    if (hasBg) { ln(``); ln(`        bgSound = makeSound("${soundA[0].soundName}", hrp, 0.5, true)`); ln(`        bgSound:Play()`); }
-    if (hasLoop) { ln(``); ln(`        -- init per-anim sounds`); ln(loopInits); }
-    if (hasModes) { ln(``); ln(`        -- mode animation tables`); ln(modeAnimTables); }
-    if (chatOn) { ln(``); ln(`        setupChat()`); }
-    ln(``);
-    ln(`        setSpeed(SPEED_WALK)`);
-    ln(`        setBase("idle")`);
-    ln(`        setupFlingTouched(figure)`);
-    ln(``);
+    ln('        }');
+    ln('        animJump = baseAnims.jump');
+    if (actionA.length) { ln(''); ln('        actionAnims = {'); ln(actionAnimsLua); ln('        }'); }
+    if (hasBg) { ln(''); ln('        bgSound = makeSound("' + soundA[0].soundName + '", hrp, 0.5, true)'); ln('        bgSound:Play()'); }
+    if (hasLoop) { ln(''); ln('        -- init per-anim sounds'); ln(loopInits); }
+    if (hasModes) { ln(''); ln('        -- mode animation tables'); ln(modeAnimTables); }
+    if (chatOn) { ln(''); ln('        setupChat()'); }
+    ln('');
+    ln('        setSpeed(SPEED_WALK)');
+    ln('        setBase("idle")');
+    ln('        setupFlingTouched(figure)');
+    ln('');
     if (hasSprint) {
-      ln(`        ContextActions:BindAction("GM_Sprint", function(_, inputState, _)`);
-      ln(`            if inputState == Enum.UserInputState.Begin then toggleSprint() end`);
-      ln(`        end, true, Enum.KeyCode.${spKey})`);
-      ln(`        ContextActions:SetTitle("GM_Sprint", "${spLS}")`);
-      ln(`        ContextActions:SetPosition("GM_Sprint", UDim2.new(${spPX}, ${spOX}, ${spPY}, ${spOY}))`);
-      ln(``);
+      ln('        ContextActions:BindAction("GM_Sprint", function(_, inputState, _)');
+      ln('            if inputState == Enum.UserInputState.Begin then toggleSprint() end');
+      ln('        end, true, Enum.KeyCode.' + spKey + ')');
+      ln('        ContextActions:SetTitle("GM_Sprint", "' + spLS + '")');
+      ln('        ContextActions:SetPosition("GM_Sprint", UDim2.new(' + spPX + ', ' + spOX + ', ' + spPY + ', ' + spOY + '))');
+      ln('');
     }
     if (hasModes) {
-      ln(`        bindDefaultAttacks()`);
+      ln('        bindDefaultAttacks()');
       ln(modeBinds);
     } else {
       if (btnBinds) ln(btnBinds);
     }
-    ln(`    end`);
-    ln(``);
-    ln(`    -- UPDATE`);
-    ln(`    m.Update = function(dt, figure)`);
-    ln(`        local hum = figure:FindFirstChildOfClass("Humanoid")`);
-    ln(`        if not hum then return end`);
-    ln(`        local inAir = hum.FloorMaterial == Enum.Material.Air`);
-    ln(``);
-    ln(`        if currentAction then`);
+    ln('    end');
+    ln('');
+    ln('    -- UPDATE');
+    ln('    m.Update = function(dt, figure)');
+    ln('        local hum = figure:FindFirstChildOfClass("Humanoid")');
+    ln('        if not hum then return end');
+    ln('        local inAir = hum.FloorMaterial == Enum.Material.Air');
+    ln('');
+    ln('        if currentAction then');
     if (hasModes) ln(modeActionUpdateCheck);
-    ln(`            local a = actionAnims[currentAction]`);
-    ln(`            if a and actionStart[a] then`);
-    ln(`                local elapsed  = os.clock() - actionStart[a]`);
-    ln(`                local duration = a.track and a.track.Time or 0`);
-    ln(`                if duration > 0 and elapsed >= duration / (a.speed or 1) then`);
-    ln(`                    a.weight      = 0`);
-    ln(`                    stopAllAnimSounds()`);
-    ln(`                    currentAction = nil`);
-    ln(`                    flingActive   = false`);
-    ln(`                    currentBase   = "none"`);
-    ln(`                end`);
-    ln(`            end`);
-    ln(`        end`);
-    ln(``);
-    ln(`        if not currentAction then`);
-    ln(`            if inAir then`);
-    ln(`                if not wasInAir then`);
-    ln(`                    clearBase()`);
-    ln(`                    currentBase           = "jump"`);
-    ln(`                    animJump.weight       = 1`);
-    ln(`                    actionStart[animJump] = os.clock()`);
-    ln(`                end`);
-    ln(`            else`);
-    ln(`                if wasInAir then animJump.weight = 0 end`);
-    ln(`                local moving = hum.MoveDirection.Magnitude > 0.1`);
-    ln(`                if moving then`);
-    if (hasSprint) ln(`                    if isSprinting then setBase("sprint") else setBase("walk") end`);
-    else ln(`                    setBase("walk")`);
-    ln(`                else`);
-    ln(`                    setBase("idle")`);
-    ln(`                end`);
-    ln(`            end`);
-    ln(`        end`);
-    ln(``);
-    ln(`        wasInAir = inAir`);
-    ln(`        local now = os.clock()`);
-    ln(`        for _, a in pairs(baseAnims) do if a.weight > 0 then a:Step(now) end end`);
-    if (hasModes) ln(`        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight and a.weight > 0 then a:Step(now) end end end`);
-    ln(`        for a, start in pairs(actionStart) do if a.weight > 0 then a:Step(now - start) end end`);
-    ln(`    end`);
-    ln(``);
-    ln(`    -- DESTROY`);
-    ln(`    m.Destroy = function(figure)`);
-    lnif(hasSprint, `        ContextActions:UnbindAction("GM_Sprint")`);
+    ln('            local a = actionAnims[currentAction]');
+    ln('            if a and actionStart[a] then');
+    ln('                local elapsed  = os.clock() - actionStart[a]');
+    ln('                local duration = a.track and a.track.Time or 0');
+    ln('                if duration > 0 and elapsed >= duration / (a.speed or 1) then');
+    ln('                    a.weight      = 0');
+    ln('                    stopAllAnimSounds()');
+    ln('                    currentAction = nil');
+    ln('                    flingActive   = false');
+    ln('                    currentBase   = "none"');
+    ln('                end');
+    ln('            end');
+    ln('        end');
+    ln('');
+    ln('        if not currentAction then');
+    ln('            if inAir then');
+    ln('                if not wasInAir then');
+    ln('                    clearBase()');
+    ln('                    currentBase           = "jump"');
+    ln('                    animJump.weight       = 1');
+    ln('                    actionStart[animJump] = os.clock()');
+    ln('                end');
+    ln('            else');
+    ln('                if wasInAir then animJump.weight = 0 end');
+    ln('                local moving = hum.MoveDirection.Magnitude > 0.1');
+    ln('                if moving then');
+    if (hasSprint) ln('                    if isSprinting then setBase("sprint") else setBase("walk") end');
+    else ln('                    setBase("walk")');
+    ln('                else');
+    ln('                    setBase("idle")');
+    ln('                end');
+    ln('            end');
+    ln('        end');
+    ln('');
+    ln('        wasInAir = inAir');
+    ln('        local now = os.clock()');
+    ln('        for _, a in pairs(baseAnims) do if a.weight > 0 then a:Step(now) end end');
+    if (hasModes) ln('        for _, mt in ipairs(modeAnims) do for _, a in pairs(mt) do if type(a)=="table" and a.weight and a.weight > 0 then a:Step(now) end end end');
+    ln('        for a, start in pairs(actionStart) do if a.weight > 0 then a:Step(now - start) end end');
+    ln('    end');
+    ln('');
+    ln('    -- DESTROY');
+    ln('    m.Destroy = function(figure)');
+    lnif(hasSprint, '        ContextActions:UnbindAction("GM_Sprint")');
     if (hasModes) {
-      ln(`        unbindDefaultAttacks()`);
+      ln('        unbindDefaultAttacks()');
       ln(modeUnbinds);
       modes.forEach((mo,i) => mo.attacks.filter(a => a.name.trim()).forEach(a =>
-        ln(`        ContextActions:UnbindAction("GM_M${i+1}_${a.name}")`)
+        ln('        ContextActions:UnbindAction("GM_M' + (i+1) + '_' + a.name + '")')
       ));
     } else {
       if (btnUnbinds) ln(btnUnbinds);
     }
-    ln(``);
-    ln(`        for _, conn in ipairs(touchConns) do conn:Disconnect() end`);
-    ln(`        table.clear(touchConns)`);
-    ln(``);
-    lnif(hasBg, `        if bgSound then bgSound:Stop() bgSound:Destroy() bgSound = nil end`);
-    ln(`        stopAllAnimSounds()`);
+    ln('');
+    ln('        for _, conn in ipairs(touchConns) do conn:Disconnect() end');
+    ln('        table.clear(touchConns)');
+    ln('');
+    lnif(hasBg, '        if bgSound then bgSound:Stop() bgSound:Destroy() bgSound = nil end');
+    ln('        stopAllAnimSounds()');
     if (hasLoop) ln(loopDestroys);
-    if (chatOn) ln(`        if chatConn then chatConn:Disconnect() chatConn = nil end`);
-    ln(``);
-    ln(`        for _, joint in ipairs(allJoints) do`);
-    ln(`            if joint and joint.Parent then joint.Transform = CFrame.identity end`);
-    ln(`        end`);
-    ln(`        allJoints = {}`);
-    ln(``);
-    ln(`        for _, a in pairs(baseAnims)   do a.weight = 0 end`);
-    ln(`        for _, a in pairs(actionAnims) do a.weight = 0 end`);
-    ln(``);
-    ln(`        setSpeed(16)`);
-    ln(`        actionStart   = {}`);
-    ln(`        currentAction = nil`);
-    ln(`        currentBase   = "idle"`);
-    ln(`        wasInAir      = false`);
-    ln(`        flingActive   = false`);
-    ln(`        figureRef     = nil`);
-    ln(`        animJump      = nil`);
-    ln(`        baseAnims     = {}`);
-    ln(`        actionAnims   = {}`);
-    lnif(hasSprint, `        isSprinting = false`);
-    if (hasModes) { ln(`        currentMode = 0`); ln(`        modeAnims   = {}`); }
-    ln(`    end`);
-    ln(``);
-    ln(`    return m`);
-    ln(`end)`);
-    ln(``);
-    ln(`return modules`);
+    if (chatOn) ln('        if chatConn then chatConn:Disconnect() chatConn = nil end');
+    ln('');
+    ln('        for _, joint in ipairs(allJoints) do');
+    ln('            if joint and joint.Parent then joint.Transform = CFrame.identity end');
+    ln('        end');
+    ln('        allJoints = {}');
+    ln('');
+    ln('        for _, a in pairs(baseAnims)   do a.weight = 0 end');
+    ln('        for _, a in pairs(actionAnims) do a.weight = 0 end');
+    ln('');
+    ln('        setSpeed(16)');
+    ln('        actionStart   = {}');
+    ln('        currentAction = nil');
+    ln('        currentBase   = "idle"');
+    ln('        wasInAir      = false');
+    ln('        flingActive   = false');
+    ln('        figureRef     = nil');
+    ln('        animJump      = nil');
+    ln('        baseAnims     = {}');
+    ln('        actionAnims   = {}');
+    lnif(hasSprint, '        isSprinting = false');
+    if (hasModes) { ln('        currentMode = 0'); ln('        modeAnims   = {}'); }
+    ln('    end');
+    ln('');
+    ln('    return m');
+    ln('end)');
+    ln('');
+    ln('return modules');
 
     _code = L.join('\n');
     $('codeOut').textContent = _code;
