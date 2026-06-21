@@ -1,0 +1,87 @@
+// ===== Tab Switching =====
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(`panel-${target}`).classList.add('active');
+    });
+});
+
+// ===== Speed Slider =====
+const speedRange = document.getElementById('speed-range');
+const speedVal = document.getElementById('speed-val');
+
+speedRange.addEventListener('input', () => {
+    speedVal.textContent = speedRange.value;
+});
+
+// ===== Apply Button =====
+const applyBtn = document.getElementById('apply-btn');
+const statusMsg = document.getElementById('status-msg');
+
+applyBtn.addEventListener('click', () => {
+    const autoFarm = document.getElementById('auto-farm').checked;
+    const fastSpeed = document.getElementById('fast-speed').checked;
+    const speed = speedRange.value;
+
+    // Purely local state — just reflects the UI back to the user.
+    statusMsg.textContent = `Saved: Automation ${autoFarm ? 'on' : 'off'}, Fast Walkspeed ${fastSpeed ? 'on' : 'off'}, Speed ${speed}.`;
+    statusMsg.classList.add('show');
+
+    clearTimeout(applyBtn._timeout);
+    applyBtn._timeout = setTimeout(() => {
+        statusMsg.classList.remove('show');
+    }, 3000);
+});
+
+// ===== Teleport Tab (cosmetic only — picks a label, no actual movement) =====
+const locationButtons = document.querySelectorAll('.location-btn');
+const teleportMsg = document.getElementById('teleport-msg');
+
+locationButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        locationButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+
+        teleportMsg.textContent = `Selected: ${btn.dataset.loc}`;
+        teleportMsg.classList.add('show');
+
+        clearTimeout(btn._timeout);
+        btn._timeout = setTimeout(() => {
+            teleportMsg.classList.remove('show');
+        }, 2000);
+    });
+});
+
+// ===== Settings: Compact Mode =====
+const compactMode = document.getElementById('compact-mode');
+
+compactMode.addEventListener('change', () => {
+    document.querySelector('.menu-container').classList.toggle('compact', compactMode.checked);
+});
+
+// ===== Settings: Reset =====
+const resetBtn = document.getElementById('reset-btn');
+
+resetBtn.addEventListener('click', () => {
+    document.getElementById('auto-farm').checked = false;
+    document.getElementById('fast-speed').checked = false;
+    document.getElementById('compact-mode').checked = false;
+    speedRange.value = 16;
+    speedVal.textContent = 16;
+    document.querySelector('.menu-container').classList.remove('compact');
+
+    locationButtons.forEach(b => b.classList.remove('selected'));
+
+    resetBtn.textContent = 'Reset Complete';
+    setTimeout(() => {
+        resetBtn.textContent = 'Reset All Settings';
+    }, 1500);
+});
